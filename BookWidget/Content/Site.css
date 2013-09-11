@@ -1,0 +1,230 @@
+﻿/*----------------------------------------------------------
+The base color for this template is #5c87b2. If you'd like
+to use a different color start by replacing all instances of
+#5c87b2 with your new color.
+----------------------------------------------------------*/
+body {
+    background-color: white;
+    font-size: .85em;
+    font-family: "Trebuchet MS", Verdana, Helvetica, Sans-Serif;
+    margin: 0;
+    padding: 0;
+    color: black;
+}
+
+a:link {
+    color: #034af3;
+    text-decoration: underline;
+}
+
+a:visited {
+    color: #505abc;
+}
+
+a:hover {
+    color: #1d60ff;
+    text-decoration: none;
+}
+
+a:active {
+    color: #12eb87;
+}
+
+p, ul {
+    margin-bottom: 20px;
+    line-height: 1.6em;
+}
+
+header,
+footer,
+nav,
+section {
+    display: block;
+}
+
+/* HEADINGS   
+----------------------------------------------------------*/
+h1, h2, h3, h4, h5, h6 {
+    font-size: 1.5em;
+    color: #000;
+}
+
+h1 {
+    font-size: 2em;
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+
+h2 {
+    padding: 0 0 10px 0;
+}
+
+h3 {
+    font-size: 1.2em;
+}
+
+h4 {
+    font-size: 1.1em;
+}
+
+h5, h6 {
+    font-size: 1em;
+}
+
+/* PRIMARY LAYOUT ELEMENTS   
+----------------------------------------------------------*/
+
+/* you can specify a greater or lesser percentage for the 
+page width. Or, you can specify an exact pixel width. */
+.page {
+    width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/*header, #header {
+    position: relative;
+    margin-bottom: 0px;
+    color: #000;
+    padding: 0;
+}
+
+header h1, #header h1 {
+    font-weight: bold;
+    padding: 5px 0;
+    margin: 0;
+    color: #fff;
+    border: none;
+    line-height: 2em;
+    font-size: 32px !important;
+    text-shadow: 1px 1px 2px #111;
+}
+
+ #main {
+    padding: 30px 30px 15px 30px;
+    background-color: #fff;
+    border-radius: 4px 0 0 0;
+    -webkit-border-radius: 4px 0 0 0;
+    -moz-border-radius: 4px 0 0 0;
+} 
+
+footer, 
+#footer {
+    background-color: #fff;
+    color: #999;
+    padding: 10px 0;
+    text-align: center;
+    line-height: normal;
+    margin: 0 0 30px 0;
+    font-size: .9em;
+    border-radius: 0 0 4px 4px;
+    -webkit-border-radius: 0 0 4px 4px;
+    -moz-border-radius: 0 0 4px 4px;
+}  */
+
+/* Styles for book related tags 
+----------------------------------------------------------*/
+#BookData {
+    list-style: none;
+    padding: 0;
+    margin: 0 auto;
+    clear: both;
+}
+
+div.Pagination {
+    width: 100%; 
+}
+
+.Pagination ul {
+    width: 10em;
+    display: block;
+    list-style: none;
+    margin-left: auto;
+    margin-right: auto;
+    clear: both;
+}
+
+.Pagination li {
+    float: left;
+    margin: 4px;
+}
+
+.BookItem {
+    font-size: 0.8em;
+    list-style: none;
+    float: right;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid;
+    border-top-color: gray;
+    list-style-position: inside;
+    width: 100%;
+}
+
+.BookItem li {
+    list-style: none;
+}
+
+.BookItem h1 {
+    font-size: 1.2em;
+    margin-top: 0;
+}
+
+.BookItem h2 {
+    font-size: 1.0em;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.BookItem h3 {
+    font-size: 0.9em;
+}
+
+ul.MainBookInfo {
+    float: left;
+    padding: 0;
+    margin: 0 auto;
+    width: 60%;
+}
+
+ul.SecondaryBookInfo {
+    float: right;
+    padding: 4px;
+    margin: 4px auto;
+}
+
+ul.BookItemCommands {
+    float: left;
+    padding: 2px;
+    margin: 2px auto;
+}
+
+.BookItemCommands li {
+    float: inherit;
+    padding: inherit;
+}
+
+h1.Status {
+    font-size: 1.5em;
+}
+
+li#ErrorMessage {
+    list-style: none;
+    float: left;
+    width: 100%;
+}
+
+div#termsOfUse {
+    width: 100%;
+    clear: both;
+}
+
+#termsOfUse a {
+    font-size: 0.7em;
+    display: block;
+    text-align: center;
+}
+
+h2.Error {
+	color: red;
+}

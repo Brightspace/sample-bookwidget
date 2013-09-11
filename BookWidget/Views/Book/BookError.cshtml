@@ -1,0 +1,19 @@
+﻿@model System.Web.Mvc.HandleErrorInfo
+
+@{
+    ViewBag.Title = "Error";
+}
+
+@if(( ViewBag.ErrorMessage == null ) || ( ViewBag.ErrorMessage.Length == 0 )) {
+	<p class="text-error">
+		Undefined Error.
+	</p>
+} else {
+	<p class="text-error">
+		@ViewBag.ErrorMessage
+	</p>
+}
+
+<br/>
+
+<a href="/Book/Assigned">Back to assigned books.</a>

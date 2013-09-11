@@ -1,0 +1,129 @@
+﻿@model BookWidget.ViewModels.BookItemResults
+
+@{
+    ViewBag.Title = "Books";
+}
+
+<script type="text/javascript">
+
+	$( document ).ready( function() {
+
+		var canEdit = @Model.CanEdit.ToString().ToLowerInvariant();
+
+		var totalBooks = @Html.Raw( Model.Items.Count().ToString() );
+
+		if( totalBooks === 0 ) {
+			$( "#mainBookArea" ).append( createHeroUnit( canEdit ) );
+		} else {
+			$( "#mainBookArea" ).append( createAddBookLink( canEdit ) );
+		}
+
+	} );
+
+	function handleError( textStatus ) {
+		window.location.replace("/book/Error?message=" + textStatus);
+	}
+
+	function createHeroUnit( canEdit ) {
+
+		var addLink = '<a id="addBookLink" href="#" onclick="showAddBook()">Add a book.</a>';
+
+		if( !canEdit ) {
+			addLink = "";
+		}
+		
+		var template = [
+			'<div class="hero-unit">',
+				'<h2>No books assigned!</h2>',
+				addLink,
+			'</div>'
+		].join( '\n' );
+
+		return $( template );
+	}
+
+	function createAddBookLink( canEdit ) {
+
+		var template = '<a id="addBookLink" href="#" onclick="showAddBook()">Add another book.</a>';
+
+		if( !canEdit ) {
+			template = "";
+		}
+
+		return $( template );
+	}
+
+	function removeBook( isbn ) {
+
+		$.blockUI({ message: '<div class="alert alert-info">Removing.</div>' });
+
+		var id = "#book-" + isbn;
+
+		$.ajax({
+			url: "/book/Assigned/" + isbn,
+			type: "DELETE",
+			success: function () {
+
+				$(id).remove();
+
+				$("#formAddBook").remove();
+
+				var len = $('.thumbnails').children().size();
+
+				if (len === 0) {
+					$( "#addBookLink " ).replaceWith( createHeroUnit( ) );
+				}
+
+				$.unblockUI();
+			},
+			error: function (request, error) { handleError(error + ": Unable to remove book from course."); }
+		});
+	}   
+
+	function addBook() {
+
+		$.blockUI({ message: '<div class="alert alert-info">Adding book...</div>' });
+
+		var isbn = $( "#addBookIsbn" ).val( );
+
+		$.ajax({
+			url: "/book/Assigned/" + isbn,
+			type: "POST",
+			success: function () {
+
+				$( '#addBook' ).remove();
+
+				window.location.replace( "/Book/Assigned" );
+			},
+			error: function (request, error) { handleError(error + ": Unable to assign book to course."); }
+		});
+	}
+
+	function showAddBook() {
+		
+		var template = [ 
+			'<div id="formAddBook" class="form-inline">',
+				'<input id="addBookIsbn" type="text" class="input-small" placeholder="Enter ISBN"/>',
+				'<a href="#" class="btn" onclick="addBook()">Add</a>',
+			'</div>'
+		].join( '\n' );
+
+		$( "#addBookLink" ).replaceWith( template );
+	}
+</script>
+
+<div id="mainBookArea"></div>
+
+<ul class="thumbnails">
+@foreach( var item in Model.Items ) {
+	<li id="book-@item.Isbn" class="span2">
+		<a href="#" class="thumbnail" title="@item.Title - @item.Author" >
+			<img src="@item.ThumbnailUrl" alt="cover" /> 
+
+			@if( Model.CanEdit ) {
+				<a href="#" class="btn" onclick=" removeBook( '@item.Isbn' ) ">Remove</a>
+			}
+		</a>	
+	</li>
+}
+</ul>

@@ -1,0 +1,13 @@
+*.exe
+*.dll
+*.pdb
+*.cache
+*.suo
+*.vsmdi
+*.user
+BookWidget/bin/*
+BookWidget/obj/*
+GoogleBook/obj/*
+builds/*
+packages/*
+*.testsettings

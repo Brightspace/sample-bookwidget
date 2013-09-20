@@ -1,217 +1,187 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Web;
 using System.Web.Mvc;
-using System.Web.Script.Serialization;
 
+using BookWidget.Domain;
 using BookWidget.Models;
 using BookWidget.ViewModels;
 
 using D2L.Extensibility.AuthSdk;
 
-using Valence;
-
 namespace BookWidget.Controllers
 {
-    public class RestHttpVerbFilter : ActionFilterAttribute {
+	public class BookController : Controller {
 
-        public override void OnActionExecuting(ActionExecutingContext filterContext) {
+		private const string SESSION_KEY = "bookwidget_sample_parameters";
 
-            var httpMethod = filterContext.HttpContext.Request.HttpMethod;
-            filterContext.ActionParameters["httpVerb"] = httpMethod;
-            base.OnActionExecuting(filterContext);
-        }
-    }
+		private readonly string m_defaultAppId = "";
+		private readonly string m_defaultAppKey = "";
 
-    public class BookController : Controller {
+		public BookController( ) {
 
-        private const string _defaultSessionKey = "sample_app_parameters";
+			m_defaultAppId = System.Configuration.ConfigurationManager.AppSettings["ValenceAppId"];
+			m_defaultAppKey = System.Configuration.ConfigurationManager.AppSettings["ValenceAppKey"];
+		}
 
-	    private string _defaultAppID = "";
-	    private string _defaultAppKey = "";
+		private bool CanEdit( string roles ) {
 
-        private Models.Course Course { get; set; } 
+			if( !string.IsNullOrEmpty( roles ) ) {
 
-        public BookController( ) {
-            Course = new Course();
+				var splitRoles = roles.Split( ',' );
 
-			_defaultAppID = System.Configuration.ConfigurationManager.AppSettings["ValenceAppId"];
-			_defaultAppKey = System.Configuration.ConfigurationManager.AppSettings["ValenceAppKey"];
-        }
+				return splitRoles.Any( s => s.ToLowerInvariant() == "instructor" );
+			}
 
-        //
-        // GET: /Book/
-        [HttpGet]
-        public ActionResult Index() {
+			return false;
+		}
 
-            Valence.Request.Parameters param = null;
-	        try {
-		        param = (Valence.Request.Parameters)Session[ _defaultSessionKey ];
-	        } catch( InvalidCastException ) {}
+		private Uri GenerateAuthRedirect( Uri returnUri, Uri requestUri ) {
 
-	        if( param == null ) {
+			if(( requestUri == null ) || ( returnUri == null )) {
+				throw new ArgumentNullException();
+			}
 
-		        ViewBag.ErrorMessage = "Unable to retrieve required session parameters.";
+			var factory = new D2LAppContextFactory();
+			var appContext = factory.Create( m_defaultAppId, m_defaultAppKey );
+
+			var resultUri = new UriBuilder( requestUri.Scheme,
+											requestUri.Host,
+											requestUri.Port,
+											requestUri.AbsolutePath ).Uri;
+
+			var host = new HostSpec( returnUri.Scheme, returnUri.Host, returnUri.Port );
+			var redirectUri = appContext.CreateUrlForAuthentication( host, resultUri );
+
+			return redirectUri;
+		}
+
+		// GET: /Book/
+		[HttpGet]
+		public ActionResult Index() {
+
+			string oauthKey = System.Configuration.ConfigurationManager.AppSettings["OauthKey"];
+			string oauthSecret = System.Configuration.ConfigurationManager.AppSettings["OauthSecret"];
+
+			var param = Session[SESSION_KEY] as SessionParameters;
+
+			if( param == null ) {
+
+				ViewBag.ErrorMessage = "Unable to retrieve required session param.";
 				return View( "BookError" );
-		        
-	        }
+				
+			}
 
-	        if ( param.LtiHost == null ) {
-	                ViewBag.ErrorMessage = "LTI parameters are not valid.";
-                    return View( "BookError" );
+			if ( param.LtiUri == null ) {
+
+					ViewBag.ErrorMessage = "LTI param are not valid.";
+					return View( "BookError" );
 			}
 
 			// retrieve the required version information from the LMS
 			var factory = new D2LAppContextFactory();
-			var appContext = factory.Create( _defaultAppID, _defaultAppKey );
-			var hostInfo = new HostSpec( param.Scheme, param.LtiHost, param.LtiPort );
+			var appContext = factory.Create( m_defaultAppId, m_defaultAppKey );
+			var hostInfo = new HostSpec( param.LtiUri.Scheme, param.LtiUri.Host, param.LtiUri.Port );
 
-			ID2LUserContext context = appContext.CreateUserContext( Request.Url, hostInfo ) ??
-									  appContext.CreateAnonymousUserContext( hostInfo );
+			ID2LUserContext context = appContext.CreateUserContext( Request.Url, hostInfo );
+
+			if( context == null ) {
+
+				ViewBag.ErrorMessage = "Unable to create user context.";
+				return View( "BookError" );
+			}
 
 			param.UserContext = context;
 
-			var uri = context.CreateAuthenticatedUri( "/d2l/api/versions/", "GET" );
-			var request = ( HttpWebRequest )WebRequest.Create( uri );
-			request.Method = "GET";
+			return RedirectToAction( "Assigned" );
+		}
 
-			var versions = new Dictionary<string, string>();
+		[HttpPost]
+		public ActionResult Index( FormCollection collection ) {
 
-			var handler = new Valence.Request.ErrorHandler();
+			// verify OAuth
+			var parameters = new SessionParameters { ClassOrgId = collection["context_id"]   };
 
-			Valence.Request.Perform( request, context,
-									 delegate( string data ) {
-										 var serializer = new JavaScriptSerializer();
-										 var requestData =
-											 serializer.Deserialize<Valence.ProductVersions[]>( data );
+			if( parameters.ClassOrgId == null )  {
 
-										 foreach( Valence.ProductVersions v in requestData ) {
-											 versions[ v.ProductCode ] = v.LatestVersion;
-										 }
-									 },
-									 handler.Process );
-
-			if( handler.IsError ) {
-
-				ViewBag.ErrorMessage = handler.Message;
+				ViewBag.ErrorMessage = "Invalid class org ID.";
 				return View( "BookError" );
 			}
-			param.Versions = versions;
 
-            return RedirectToAction( "Assigned" );
-        }
+			parameters.CanEdit = CanEdit( collection["roles"] );
 
-        // extract possible LTI launch request parameters to initialize the model
-        // consider changing the parameter to a model class that defines what parameters are expected
-        // from an LTI launch request.
-        [HttpPost]
-        public ActionResult Index( FormCollection collection ) {
-            // start new user session and populate with auth info
-            var parameters = new Valence.Request.Parameters {ClassOrgId = collection["context_id"]};
+			Uri redirectUri;
 
-	        // is not LTI request
-            if( parameters.ClassOrgId == null )  {
+			try {
 
-	            ViewBag.ErrorMessage = "Invalid class org ID.";
-                return View( "BookError" );
-            }
+				Uri requestUrl = new Uri( collection["lis_outcome_service_url"] );
+				parameters.LtiUri = new UriBuilder(
+					requestUrl.Scheme,
+					requestUrl.Host,
+					requestUrl.Port
+				).Uri;
 
-	        parameters.CanEdit = false;
+				Session[ SESSION_KEY ] = parameters;
 
-	        var roles = collection["roles"];
-			
-			if( roles != null ) {
+				redirectUri = GenerateAuthRedirect( parameters.LtiUri, Request.Url );
 
-				var splitRoles = roles.ToString().Split( ',' );
+			} catch( ArgumentNullException e ) {
 
-				foreach( var s in splitRoles ) {
-					
-					if( s.ToLowerInvariant() == "instructor" ) {
+				ViewBag.ErrorMessage = "Invalid request URL. " + e.Message;
+				return View( "BookError" );
+			}
 
-						parameters.CanEdit = true;
-						break;
-					}
+			return Redirect( redirectUri.ToString( )); 
+		}
+		
+		[HttpGet]
+		public ActionResult Error( string message ) {
+
+			ViewBag.ErrorMessage = message;
+			return View( "BookError" );
+		}
+
+		[RestHttpVerbFilter]
+		public ActionResult Assigned( string isbn, string httpVerb ) {
+
+			var param = Session[SESSION_KEY] as SessionParameters;
+			if( param == null ) {
+				return View( "BookError" );
+			}
+
+			ICourse course = new Course( param );
+
+			string errorMessage = string.Empty;
+
+			try {
+				switch( httpVerb ) {
+					case "GET":
+						var items = course.AssignedBooks();
+						var results = new BookItemResults {Items = items, CanEdit = param.CanEdit};
+						return View( "BookList", results );
+
+					case "POST":
+						errorMessage = "Unable to assign book(" + isbn +") to course.";
+						course.AddBook( isbn );
+						return Json( new {Error = false} );
+
+					case "DELETE":
+						errorMessage = "Unable to remove book(" + isbn +") from course.";
+						course.RemoveBook( isbn );
+						return Json( new {Error = false} );
+				}
+			} catch( InvalidOperationException e ) {
+
+				if( httpVerb == "GET" ) {
+					ViewBag.ErrorMessage = e.Message;
+					return View( "BookError" );
 				}
 
+				Response.StatusCode = (int)HttpStatusCode.BadRequest;
+				return Json( new { Error = true, Message = errorMessage + e.Message } );
 			}
 
-            try {
-
-                Uri requestUrl = new Uri(collection["launch_presentation_return_url"]);
-                parameters.LtiHost = requestUrl.Host;
-				parameters.LtiPort = requestUrl.Port;
-                parameters.Scheme = requestUrl.Scheme;
-            }
-            catch( ArgumentNullException ) {
-
-	            ViewBag.ErrorMessage = "Invalid request URL.";
-				return View( "BookError" );
-            }
-
-            Session[ _defaultSessionKey ] = parameters;
-
-            var factory = new D2LAppContextFactory();
-            var appContext = factory.Create( _defaultAppID, _defaultAppKey );
-
-            var resultUri = new UriBuilder( Request.Url.Scheme,
-                                            Request.Url.Host,
-                                            Request.Url.Port,
-                                            Request.Url.AbsolutePath ).Uri;
-
-            var host = new HostSpec( parameters.Scheme, parameters.LtiHost, parameters.LtiPort );
-            var uri = appContext.CreateUrlForAuthentication( host, resultUri );
-
-            return Redirect( uri.ToString() );
-        }
-        
-        [HttpGet]
-        public ActionResult Error( string message ) {
-
-            ViewBag.ErrorMessage = message;
-            return View( "BookError" );
-        }
-
-        [RestHttpVerbFilter]
-        public ActionResult Assigned( string isbn, string httpVerb ) {
-
-            var sessionData = Session[_defaultSessionKey];
-            if( sessionData == null ) {
-                return View( "BookError" );
-            }
-            var parameters = ( Valence.Request.Parameters )sessionData;
-
-            string errorMessage = "";
-
-            switch (httpVerb) {
-                case "GET":
-					BookItem[] items = Course.AssignedBooks( parameters, ref errorMessage );
-
-					ActionResult resultView;
-
-					if( errorMessage.Length > 0 ) {
-
-						resultView = View( "BookError", errorMessage );
-					} else {
-
-						var result = new BookItemResults { Items = items, CanEdit = parameters.CanEdit };
-						resultView = View( "BookList", result );
-					}
-		            return resultView;
-                case "POST":
-                    if( !Course.AddBook( parameters, isbn, ref errorMessage ) ) {
-                        return Json( new {Error = true, Message = "Unable to assign book(" + isbn + ") to course." + errorMessage} );
-                    }
-		            return Json( new {Error = false} );
-                case "DELETE":
-                    if( !Course.RemoveBook( parameters, isbn, ref errorMessage ) ) {
-                        return Json( new {Error = true, Message = "Unable to remove book(" + isbn + ") to course." + errorMessage} );
-                    }
-		            return Json( new {Error = false} );
-            }
-
-            return View( "BookError" );
-        }
-    }
+			return View( "BookError" );
+		}
+	}
 }

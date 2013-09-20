@@ -1,0 +1,13 @@
+syntax: glob
+*.exe
+*.dll
+*.pdb
+*.cache
+*.suo
+*.vsmdi
+*.user
+BookWidget/bin/*
+BookWidget/obj/*
+GoogleBook/obj/*
+builds/*
+*.testsettings

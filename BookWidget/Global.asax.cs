@@ -1,45 +1,32 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
 
-namespace BookWidget
-{
-    // Note: For instructions on enabling IIS6 or IIS7 classic mode, 
-    // visit http://go.microsoft.com/?LinkId=9394801
+namespace BookWidget {
 
-    public class MvcApplication : System.Web.HttpApplication
-    {
-        public static void RegisterGlobalFilters(GlobalFilterCollection filters)
-        {
-            filters.Add(new HandleErrorAttribute());
-        }
+	public class MvcApplication : System.Web.HttpApplication {
 
-        public static void RegisterRoutes(RouteCollection routes)
-        {
-            routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
+		public static void RegisterGlobalFilters( GlobalFilterCollection filters ) {
+			filters.Add( new HandleErrorAttribute() );
+		}
 
-            routes.MapRoute(
-                "BookRoute",
-                "Book/{action}/{isbn}",
-                new { controller = "Book", action = "Index", isbn = UrlParameter.Optional }
-                );
+		public static void RegisterRoutes(RouteCollection routes) {
 
-            routes.MapRoute(
-                "DefaultRoute", 
-                "{controller}/{action}/{id}", // URL with parameters
-                new { controller = "Home", action = "Index", id = UrlParameter.Optional } // Parameter defaults
-            );
-        }
+			routes.IgnoreRoute( "{resource}.axd/{*pathInfo}" );
 
-        protected void Application_Start()
-        {
-            AreaRegistration.RegisterAllAreas();
+			routes.MapRoute(
+				"BookRoute",
+				"Book/{action}/{isbn}",
+				new { controller = "Book", action = "Index", isbn = UrlParameter.Optional }
+			);
+		}
 
-            RegisterGlobalFilters(GlobalFilters.Filters);
-            RegisterRoutes(RouteTable.Routes);
-        }
-    }
+		protected void Application_Start() {
+
+			AreaRegistration.RegisterAllAreas();
+
+			RegisterGlobalFilters( GlobalFilters.Filters );
+			RegisterRoutes( RouteTable.Routes );
+		}
+	}
 }

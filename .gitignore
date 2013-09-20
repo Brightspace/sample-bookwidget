@@ -1,4 +1,3 @@
-syntax: glob
 *.exe
 *.dll
 *.pdb
@@ -10,4 +9,5 @@ BookWidget/bin/*
 BookWidget/obj/*
 GoogleBook/obj/*
 builds/*
+packages/*
 *.testsettings

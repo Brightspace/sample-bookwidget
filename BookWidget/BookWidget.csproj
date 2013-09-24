@@ -53,8 +53,8 @@
     <Reference Include="D2L.Extensibility.AuthSdk.Restsharp">
       <HintPath>..\packages\D2L.Extensibility.AuthSdk.Restsharp.1.0.0\lib\net40\D2L.Extensibility.AuthSdk.Restsharp.dll</HintPath>
     </Reference>
-    <Reference Include="DotNetOpenAuth">
-      <HintPath>..\packages\DotNetOpenAuth.Ultimate.4.3.1.13153\lib\net40-full\DotNetOpenAuth.dll</HintPath>
+    <Reference Include="DevDefined.OAuth">
+      <HintPath>..\packages\DevDefined.OAuth.0.1\lib\DevDefined.OAuth.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="RestSharp, Version=104.2.0.0, Culture=neutral, processorArchitecture=MSIL">

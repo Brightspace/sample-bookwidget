@@ -9,6 +9,9 @@ using BookWidget.ViewModels;
 
 using D2L.Extensibility.AuthSdk;
 
+using DevDefined.OAuth.Framework;
+using DevDefined.OAuth.Framework.Signing;
+
 namespace BookWidget.Controllers
 {
 	public class BookController : Controller {
@@ -60,9 +63,6 @@ namespace BookWidget.Controllers
 		[HttpGet]
 		public ActionResult Index() {
 
-			string oauthKey = System.Configuration.ConfigurationManager.AppSettings["OauthKey"];
-			string oauthSecret = System.Configuration.ConfigurationManager.AppSettings["OauthSecret"];
-
 			var param = Session[SESSION_KEY] as SessionParameters;
 
 			if( param == null ) {
@@ -96,10 +96,31 @@ namespace BookWidget.Controllers
 			return RedirectToAction( "Assigned" );
 		}
 
+		private bool IsOAuthSignatureValid() {
+
+			string oauthKey = System.Configuration.ConfigurationManager.AppSettings["OauthKey"];
+			// Normally would use key to lookup appropriate secret for the specifc LMS
+
+			string oauthSecret = System.Configuration.ConfigurationManager.AppSettings["OauthSecret"];
+
+			var context = new OAuthContextBuilder().FromHttpRequest( Request );
+
+			IOAuthContextSigner signer = new OAuthContextSigner();
+
+			SigningContext signingContext = new SigningContext {ConsumerSecret = oauthSecret};
+
+			return signer.ValidateSignature( context, signingContext );
+		}
+
 		[HttpPost]
 		public ActionResult Index( FormCollection collection ) {
 
-			// verify OAuth
+			if( !IsOAuthSignatureValid() ) {
+
+				ViewBag.ErrorMessage = "Invalid OAuth signature.";
+				return View( "BookError" );
+			}
+
 			var parameters = new SessionParameters { ClassOrgId = collection["context_id"]   };
 
 			if( parameters.ClassOrgId == null )  {

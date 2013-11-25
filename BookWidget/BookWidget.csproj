@@ -46,20 +46,22 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="D2L.Extensibility.AuthSdk, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="D2L.Extensibility.AuthSdk, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\D2L.Extensibility.AuthSdk.1.0.6\lib\net40\D2L.Extensibility.AuthSdk.dll</HintPath>
+      <HintPath>..\packages\D2L.Extensibility.AuthSdk.1.1.0\lib\net40\D2L.Extensibility.AuthSdk.dll</HintPath>
     </Reference>
-    <Reference Include="D2L.Extensibility.AuthSdk.Restsharp">
-      <HintPath>..\packages\D2L.Extensibility.AuthSdk.Restsharp.1.0.0\lib\net40\D2L.Extensibility.AuthSdk.Restsharp.dll</HintPath>
+    <Reference Include="D2L.Extensibility.AuthSdk.Restsharp, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\D2L.Extensibility.AuthSdk.Restsharp.1.1.0\lib\net40\D2L.Extensibility.AuthSdk.Restsharp.dll</HintPath>
     </Reference>
-    <Reference Include="DevDefined.OAuth">
+    <Reference Include="DevDefined.OAuth, Version=1.0.0.0, Culture=neutral, PublicKeyToken=a3261f5b4697e67d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\DevDefined.OAuth.0.1\lib\DevDefined.OAuth.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="RestSharp, Version=104.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="RestSharp, Version=104.4.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\RestSharp.104.2.0\lib\net4\RestSharp.dll</HintPath>
+      <HintPath>..\packages\RestSharp.104.4.0\lib\net4\RestSharp.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.Mvc, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Web.WebPages, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
@@ -153,8 +155,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>63128</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>
-          </IISUrl>
+          <IISUrl>http://localhost/BookWidget</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>

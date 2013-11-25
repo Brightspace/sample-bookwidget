@@ -5,6 +5,7 @@
 *.suo
 *.vsmdi
 *.user
+*.DotSettings
 BookWidget/bin/*
 BookWidget/obj/*
 GoogleBook/obj/*

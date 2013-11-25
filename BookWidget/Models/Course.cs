@@ -131,6 +131,9 @@ namespace BookWidget.Models {
 
 						BookItem book = GoogleBookAdaptor.Adapt( item );
 
+						// ensure that the isbn in the LMS is set.  Sometimes GoogleBooks returns an alternate ISBN
+						book.Isbn = b.Isbn; 
+
 						bookList.Add( book );
 					}
 				} catch( ArgumentNullException ) {}
